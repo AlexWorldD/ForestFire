@@ -38,7 +38,7 @@ def generate_initial_state(rows, cols, tree_density):
         for col in range(0, cols):
             cells[row][col] = Cell(CellState.Soil, 1, 1, 1, 1)
 
-    #fill n-first elements in array, then shuffle cells in each row and each rows in whole cell-matrix
+    # fill n-first elements in array, then shuffle cells in each row and each rows in whole cell-matrix
     trees_amount = int(rows * cols * tree_density)
     current_amount = 0
     for row in range(0, rows):
@@ -49,3 +49,8 @@ def generate_initial_state(rows, cols, tree_density):
     random.shuffle([random.shuffle(row) for row in cells])
 
     return cells
+
+
+def ignite_tree(cells_matrix, row, col):
+    (cells_matrix[row][col]).state = CellState.Ignited
+    return cells_matrix

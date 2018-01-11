@@ -26,3 +26,7 @@ for x in range(0, 10):
             trees += 1
 
 assert trees == int(10 * 10 * 0.3)
+
+cells = cell.ignite_tree(cells, 3, 4)
+
+assert cells[3][4].state == CellState.Ignited
