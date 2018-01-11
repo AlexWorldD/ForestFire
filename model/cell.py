@@ -2,6 +2,8 @@ import random
 from datetime import datetime
 from enum import Enum
 
+import numpy as np
+
 
 class Cell:
     def __init__(self, state, heat, T, altitude, type):
@@ -45,14 +47,22 @@ def generate_initial_state(rows, cols, tree_density):
     for row in range(0, rows):
         for col in range(0, cols):
             if current_amount < trees_amount:
-                cells[row][col].state = CellState.Virgin
+                cells[col][row].state = CellState.Virgin
                 current_amount += 1
     random.seed(datetime.now())
+
     random.shuffle(cells)
     for sublist in cells:
         random.shuffle(sublist)
 
     return cells
+
+
+def shuffle_matrix(matrix):
+    m = np.asmatrix(matrix, dtype=Cell)
+    np.random.shuffle(m)
+
+    return m.tolist()
 
 
 def ignite_tree(cells_matrix, row, col):
