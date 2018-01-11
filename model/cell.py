@@ -58,6 +58,24 @@ def generate_initial_state(rows, cols, tree_density):
     return cells
 
 
+def apply_rule(cell, hood):
+    # TODO: implement me
+    return cell
+
+
+def get_next_state(cells):
+    rows = len(cells)
+    cols = len(cells[0])
+    result = [[0] * rows for _ in range(cols)]
+
+    for row in range(0, rows):
+        for col in range(0, cols):
+            new_cell_state = apply_rule(cells[row][col], get_moore_neighborhood(cells, row, col))
+            result[row][col] = new_cell_state
+
+    return result
+
+
 def shuffle_matrix(matrix):
     m = np.asmatrix(matrix, dtype=Cell)
     np.random.shuffle(m)

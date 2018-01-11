@@ -42,3 +42,8 @@ def print_cells_matrix(matrix):
 
 cells = cell.generate_initial_state(5, 5, 0.1)
 print_cells_matrix(cells)
+print("---------------")
+new_cells = cell.get_next_state(cells)
+print_cells_matrix(new_cells)
+
+
