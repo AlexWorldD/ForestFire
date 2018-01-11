@@ -1,4 +1,5 @@
-import random as random
+import random
+from datetime import datetime
 from enum import Enum
 
 
@@ -46,7 +47,10 @@ def generate_initial_state(rows, cols, tree_density):
             if current_amount < trees_amount:
                 cells[row][col].state = CellState.Virgin
                 current_amount += 1
-    random.shuffle([random.shuffle(row) for row in cells])
+    random.seed(datetime.now())
+    random.shuffle(cells)
+    for sublist in cells:
+        random.shuffle(sublist)
 
     return cells
 
