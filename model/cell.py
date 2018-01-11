@@ -1,3 +1,6 @@
+from enum import Enum
+
+
 class Cell:
     def __init__(self, state, heat, T, altitude, type):
         self.state = state
@@ -5,6 +8,14 @@ class Cell:
         self.T = T
         self.altitude = altitude
         self.type = type
+
+
+class CellState(Enum):
+    Virgin = 0
+    Ignited = 1
+    Burning = 2
+    ColdBurned = 3
+    Soil = 4
 
 
 def get_moore_neighborhood(cells_matrix, row, col):
