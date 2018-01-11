@@ -1,3 +1,4 @@
+import random as random
 from enum import Enum
 
 
@@ -29,3 +30,22 @@ def get_moore_neighborhood(cells_matrix, row, col):
         nb.append(cells_matrix[x][y])
 
     return nb
+
+
+def generate_initial_state(rows, cols, tree_density):
+    cells = [[0] * rows for _ in range(cols)]
+    for row in range(0, rows):
+        for col in range(0, cols):
+            cells[row][col] = Cell(CellState.Soil, 1, 1, 1, 1)
+
+    #fill n-first elements in array, then shuffle cells in each row and each rows in whole cell-matrix
+    trees_amount = int(rows * cols * tree_density)
+    current_amount = 0
+    for row in range(0, rows):
+        for col in range(0, cols):
+            if current_amount < trees_amount:
+                cells[row][col].state = CellState.Virgin
+                current_amount += 1
+    random.shuffle([random.shuffle(row) for row in cells])
+
+    return cells
