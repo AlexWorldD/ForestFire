@@ -60,6 +60,18 @@ def generate_initial_state(rows, cols, tree_density):
 
 def apply_rule(cell, hood):
     # TODO: implement me
+    if cell.state.value == 0:
+        ignited_cells = 0
+        for nb in hood:
+            if nb.state.value == 1:
+                ignited_cells += 1
+
+        if ignited_cells > 1:
+            cell.state = CellState.Ignited
+
+    elif cell.state.value == 1:
+        cell.state = CellState.Burning
+
     return cell
 
 

@@ -40,10 +40,14 @@ def print_cells_matrix(matrix):
         print(row_str)
 
 
-cells = cell.generate_initial_state(5, 5, 0.1)
+cells = cell.generate_initial_state(10, 10, 0.7)
+cells = cell.ignite_tree(cells, 2, 3)
+cells = cell.ignite_tree(cells, 2, 4)
+cells = cell.ignite_tree(cells, 3, 3)
 print_cells_matrix(cells)
 print("---------------")
-new_cells = cell.get_next_state(cells)
-print_cells_matrix(new_cells)
-
-
+#new_cells = cell.get_next_state(cells)
+#print_cells_matrix(new_cells)
+for step in range(0, 10):
+    cells = cell.get_next_state(cells)
+print_cells_matrix(cells)
