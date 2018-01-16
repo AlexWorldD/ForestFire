@@ -6,12 +6,22 @@ import numpy as np
 
 
 class Cell:
-    def __init__(self, state, heat, T, altitude, type):
+    def __init__(self, state, heat, T, altitude):
         self.state = state
         self.heat = heat
         self.T = T
         self.altitude = altitude
+
+        self.type = None
+
+    def set_virgin_type(self, type):
         self.type = type
+        if self.type.value == 0:
+            self.heat_treshold = 0.5
+            self.heat_emission = 0.5
+        elif self.type.value == 1:
+            self.heat_treshold = 0.4
+            self.heat_emission = 0.4
 
 
 class CellState(Enum):
@@ -20,6 +30,11 @@ class CellState(Enum):
     Burning = 2
     ColdBurned = 3
     Soil = 4
+
+
+class VirginType(Enum):
+    Conifer = 0
+    Hardwood = 1
 
 
 def get_moore_neighborhood(cells_matrix, row, col):
@@ -39,7 +54,7 @@ def generate_initial_state(rows, cols, tree_density):
     cells = [[0] * rows for _ in range(cols)]
     for row in range(0, rows):
         for col in range(0, cols):
-            cells[row][col] = Cell(CellState.Soil, 1, 1, 1, 1)
+            cells[row][col] = Cell(CellState.Soil, 1, 1, 1)
 
     # fill n-first elements in array, then shuffle cells in each row and each rows in whole cell-matrix
     trees_amount = int(rows * cols * tree_density)
@@ -48,6 +63,7 @@ def generate_initial_state(rows, cols, tree_density):
         for col in range(0, cols):
             if current_amount < trees_amount:
                 cells[col][row].state = CellState.Virgin
+                cells[col][row].set_virgin_type(VirginType.Hardwood)
                 current_amount += 1
     random.seed(datetime.now())
 
@@ -63,7 +79,7 @@ def apply_rule(cell, hood):
     if cell.state.value == 0:
         ignited_cells = 0
         for nb in hood:
-            if nb.state.value == 1:
+            if nb.state.value == 1 or nb.state.value == 2:
                 ignited_cells += 1
 
         if ignited_cells > 1:
