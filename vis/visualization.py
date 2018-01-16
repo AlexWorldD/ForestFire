@@ -8,41 +8,16 @@ from matplotlib import colors
 
 import model.forest_model as forest
 
-'''
-fig, ax = plt.subplots()
-
-x = np.arange(0, 2 * np.pi, 0.01)
-line, = ax.plot(x, np.sin(x))
-
-
-def animate(i):
-    line.set_ydata(np.sin(x + i / 10.0))  # update the data
-    return line,
-
-
-# Init only required for blitting to give a clean slate.
-def init():
-    line.set_ydata(np.ma.array(x, mask=True))
-    return line,
-
-
-ani = animation.FuncAnimation(fig, animate, np.arange(1, 200), init_func=init,
-                              interval=25, blit=True)
-plt.show()
-
-
-'''
-
 
 def convert_states_to_colors(matrix):
-    #state_by_color = {0: 10, 1: 20, 2: 30, 3: 40, 4: 50}
+    # state_by_color = {0: 10, 1: 20, 2: 30, 3: 40, 4: 50}
     rows = len(matrix)
     cols = len(matrix[0])
     result = np.zeros((rows, cols), dtype=int)
     for i in range(0, rows):
         for j in range(0, cols):
             result[i][j] = matrix[i][j].state.value
-    #print(result)
+    # print(result)
 
     return result
 
@@ -73,4 +48,4 @@ def run_model(steps, time_interval):
     plt.show()
 
 
-run_model(100, 1000)
+
