@@ -71,7 +71,8 @@ def apply_rule(cell, hood):
 
     elif cell.state.value == 1:
         cell.state = CellState.Burning
-
+    elif cell.state.value == 2:
+        cell.state = CellState.ColdBurned
     return cell
 
 
