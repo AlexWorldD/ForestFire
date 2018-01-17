@@ -76,10 +76,10 @@ class ForestModel(Model):
     def init_fire(self):
         fire = []
         f_size = forest_params['FireSize']
-        point = (self._param_InitFireX, self._param_InitFireY)
+        point = (self._param_InitFireY, self._param_InitFireX)
         for x in range(f_size[0] + 1):
             for y in range(f_size[1] + 1):
-                if (x >= 0 and x < self._param_width) and (y >= 0 and y < self._param_height):
+                if (x >= 0 and x < self._param_height) and (y >= 0 and y < self._param_width):
                     fire.append((point[0] + x, point[1] + y))
         for it in fire:
             self.TREES[it] = Cell(it, state=CellState.Burning)
