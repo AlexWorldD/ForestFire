@@ -1,9 +1,9 @@
 from cell import *
 
 forest_params = {
-    'width': 50,
-    'height': 50,
-    'TreeDensity': 0.7,
+    'width': 5,
+    'height': 5,
+    'TreeDensity': 1,
     'TreeDistribution': {TreeType.Deciduous: 0.3, TreeType.Conifer: 0.4, TreeType.Hardwood: 0.2},
     'MAX_STEPS': 100,
     'InitFire': (0, 0),
@@ -21,6 +21,8 @@ class ForestModel:
         self.T = 0
         self.TREES = dict()
         self.FIRE = dict()
+        self.BORDER = dict()
+        self.DEAD = []
         self.initial_grid()
         self.init_fire()
 
@@ -56,15 +58,58 @@ class ForestModel:
         for it in fire:
             self.TREES[it] = Cell(it, state=CellState.Burning)
             self.FIRE[it] = self.TREES[it]
-        print('FireMe')
+
+    def get_fire_border(self):
+        self.BORDER = dict()
+        for key, item in self.FIRE.items():
+            neighbour = ((-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1))
+            for shift in neighbour:
+                n_row = item.x + shift[0]
+                n_col = item.y + shift[1]
+                if (n_row >= 0 and n_row < self.width) and (n_col >= 0 and n_col < self.height) and (
+                        (n_row, n_col) in self.TREES) and self.TREES[
+                    (n_row, n_col)].can_burn():
+                    self.BORDER[(n_row, n_col)] = self.TREES[(n_row, n_col)]
+        return self.BORDER
 
     def get_neighborhood(self, coordinates):
         nb = []
         neighbour = ((-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1))
-        count = 0
         for shift in neighbour:
             n_row = coordinates[0] + shift[0]
             n_col = coordinates[1] + shift[1]
-            if (n_row >= 0 and n_row < self.width) and (n_col >= 0 and n_col < self.height):
+            if (n_row >= 0 and n_row < self.width) and (n_col >= 0 and n_col < self.height) and (
+                    (n_row, n_col) in self.TREES):
                 nb.append((n_row, n_col))
         return nb
+
+    def step(self):
+        self.T += 1
+        self.get_fire_border()
+        patch_in = []
+        patch_out = []
+        for key, item in self.BORDER.items():
+            # TODO add wind here!
+            total_heat = sum(self.TREES[it].get_heat() for it in self.get_neighborhood(key)) / 8
+            if item.burn_tree(total_heat):
+                patch_in.append(key)
+        for flame_key, flame_item in self.FIRE.items():
+            if flame_item.step() == 0:
+                # Tree has already burned
+                patch_out.append(flame_key)
+                # Update burned trees now
+        for i in patch_out:
+            del self.FIRE[i]
+        for i in patch_in:
+            self.FIRE[i] = self.BORDER[i]
+        self.DEAD.extend(patch_out)
+        # TODO we can call update_grid with settled interval, add to model_param
+        self.update_grid()
+
+    def update_grid(self):
+        # TODO add patch techniques, not the full update
+        # 0 already means soil
+        for key, item in self.TREES.items():
+            self.grid[key[0]][key[1]] = item.state.value
+        for it in self.DEAD:
+            self.grid[it[0]][it[1]] = 4

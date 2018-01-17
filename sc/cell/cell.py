@@ -12,12 +12,12 @@ class CellState(Enum):
     """
     Selection the state for cell on the GRID
     """
-    DefTree = 0
+    Soil = 0
     Ignited = 1
     Burning = 2
     Embers = 3
     DeadBurned = 4
-    Soil = 5
+    DefTree = 5
 
 
 class TreeSize(Enum):
@@ -61,6 +61,12 @@ class Cell:
             self.evo = np.random.randint(cell_params['igni2burn'][0],
                                          cell_params['igni2burn'][1])
 
+    def can_burn(self):
+        if self.state == CellState.DefTree:
+            return True
+        else:
+            return False
+
     def in_heat_volume(self):
         res = 0
         if self.type == TreeType.DryTree:
@@ -85,25 +91,69 @@ class Cell:
             res = 30
         return 8 * res * self.size.value
 
-    def step(self, around_heat):
+    def burn_tree(self, around_heat=0):
         """
         Calculate the next state and other parameters for cell
         :param around_heat:
-        :return:
+        :return: the heat volume from this cell
         """
         if self.state == CellState.DefTree:
             self.IN_heat -= around_heat
             if self.IN_heat <= 0:
                 self.state = CellState.Ignited
+                return True
+            else:
+                return False
+
+    def step(self):
+        """
+        Calculate the next state and other parameters for cell
+        :param around_heat:
+        :return: the heat volume from this cell
+        """
+        # if self.state == CellState.DefTree:
+        #     self.IN_heat -= around_heat
+        #     if self.IN_heat <= 0:
+        #         self.state = CellState.Ignited
+        #         return self.OUT_heat * 0.3
+        #     else:
+        #         return 0
         if self.state == CellState.Ignited:
             self.evo -= 1
             if self.evo <= 0:
                 self.state = CellState.Burning
+                return self.OUT_heat
+            else:
+                return self.OUT_heat * 0.3
         if self.state == CellState.Burning:
             self.OUT_heat *= 0.9
             if self.OUT_heat <= 8:
                 self.state = CellState.Embers
+                return self.embers_heat
+            else:
+                return self.OUT_heat
         if self.state == CellState.Embers:
             self.ember_time -= 1
             if self.ember_time <= 0:
                 self.state = CellState.DeadBurned
+                return 0
+            else:
+                return self.embers_heat
+        if self.state == CellState.Soil or self.state == CellState.DeadBurned:
+            return 0
+
+    def get_heat(self):
+        """
+        Calculate the next state and other parameters for cell
+        :return: the heat volume from this cell
+        """
+        if self.state == CellState.DefTree:
+            return 0
+        if self.state == CellState.Ignited:
+            return self.OUT_heat * 0.3
+        if self.state == CellState.Burning:
+            return self.OUT_heat
+        if self.state == CellState.Embers:
+            return self.embers_heat
+        if self.state == CellState.Soil or self.state == CellState.DeadBurned:
+            return 0
