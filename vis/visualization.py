@@ -2,6 +2,8 @@
 A simple example of an animated plot
 """
 import matplotlib.animation as animation
+import matplotlib
+matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib import colors
@@ -44,7 +46,8 @@ def run_model(steps, time_interval):
 
     ani = animation.FuncAnimation(fig, animate, frames=steps,
                                   init_func=init, interval=time_interval, blit=True)
-
+    # TODO --- is't precomputed animation, what isn't fitted for us!
+    # Cause for big GRID we must wait until all computations will finished
     plt.show()
 
 

@@ -7,6 +7,7 @@ import numpy as np
 
 class Cell:
     def __init__(self, state, heat, T, altitude):
+        # TODO what does T mean??? Use @param for description of the parameter if it's not obvious
         self.state = state
         self.heat = heat
         self.T = T
@@ -50,6 +51,7 @@ def get_moore_neighborhood(cells_matrix, row, col):
     return nb
 
 
+# TODO why do you implement non-cell in class Cell??? It's forest already.
 def generate_initial_state(rows, cols, tree_density, conifer_density):
     cells = [[0] * rows for _ in range(cols)]
     for row in range(0, rows):
@@ -103,7 +105,7 @@ def get_next_state(cells):
     rows = len(cells)
     cols = len(cells[0])
     result = [[0] * rows for _ in range(cols)]
-
+    # TODO extremely slowwww realisation, change to dict()
     for row in range(0, rows):
         for col in range(0, cols):
             new_cell_state = apply_dump_rule(cells[row][col], get_moore_neighborhood(cells, row, col))
