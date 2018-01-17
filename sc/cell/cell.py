@@ -48,17 +48,18 @@ class Cell:
         self.y = coordinates[1]
         self.state = state
         self.altitude = altitude
-        if self.state == CellState.DefTree:
-            # Soil is just a soil, don't require to following attributes
+        if self.state != CellState.Soil:
             self.size = size
             self.type = tree_type
-            self.IN_heat = self.in_heat_volume()
             self.OUT_heat = self.out_heat_volume()
-            self.evo = np.random.randint(cell_params['igni2burn'][0],
-                                         cell_params['igni2burn'][1])
             self.embers_heat = self.OUT_heat * 0.07
             self.ember_time = np.random.randint(cell_params['ember2dead'][0],
                                                 cell_params['ember2dead'][1])
+        if self.state == CellState.DefTree:
+            # Soil is just a soil, don't require to following attributes
+            self.IN_heat = self.in_heat_volume()
+            self.evo = np.random.randint(cell_params['igni2burn'][0],
+                                         cell_params['igni2burn'][1])
 
     def in_heat_volume(self):
         res = 0
