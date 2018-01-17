@@ -8,10 +8,10 @@ import copy
 
 
 class Cell:
-    def __init__(self, state, heat, T, altitude):
+    def __init__(self, state, heat, altitude):
         self.state = state
         self.heat = heat
-        self.T = T
+        self.time = 0
         self.altitude = altitude
 
         self.type = None
@@ -21,9 +21,18 @@ class Cell:
         if self.type.value == 0:
             self.heat_treshold = 0.3
             self.heat_emission = 0.7
+            self.burning_period = 4
         elif self.type.value == 1:
             self.heat_treshold = 0.2
             self.heat_emission = 0.6
+            self.burning_period = 6
+
+    def try_to_increase_burning_time(self):
+        if self.time < self.burning_period:
+            self.time += 1
+            return True
+        else:
+            return False
 
 
 class CellState(Enum):
@@ -56,7 +65,7 @@ def generate_initial_state(rows, cols, tree_density, conifer_density):
     cells = [[0] * rows for _ in range(cols)]
     for row in range(0, rows):
         for col in range(0, cols):
-            cells[row][col] = Cell(CellState.Soil, 0.0, 1, 1)
+            cells[row][col] = Cell(CellState.Soil, 0.0, 1)
 
     # fill n-first elements in array, then shuffle cells in each row and each rows in whole cell-matrix
     trees_amount = int(rows * cols * tree_density)
@@ -149,7 +158,7 @@ def calculate_new_heat(cell, hood):
             heat_value += nb.heat_emission
     heat_value = heat_value / 8.0 + cell.heat
 
-    #print(heat_value)
+    # print(heat_value)
     return heat_value
 
 
@@ -162,6 +171,8 @@ def apply_heat_rule(cell, hood):
     elif cell.state.value == 1:
         new_cell.state = CellState.Burning
     elif cell.state.value == 2:
-        new_cell.state = CellState.ColdBurned
+        print(cell.time)
+        if new_cell.try_to_increase_burning_time() == False:
+            new_cell.state = CellState.ColdBurned
 
     return new_cell
