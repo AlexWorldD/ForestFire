@@ -14,9 +14,10 @@ class ForestModel:
         self.current_step = 0
 
         # TODO: add start_fire() func ?
-        self.current_state = cell.ignite_tree(self.current_state, 2, 2)
-        self.current_state = cell.ignite_tree(self.current_state, 2, 3)
-
+        self.current_state = cell.increase_heat(self.current_state, 2, 2)
+        self.current_state = cell.increase_heat(self.current_state, 2, 3)
+        self.current_state = cell.increase_heat(self.current_state, 1, 2)
+        self.current_state = cell.increase_heat(self.current_state, 3, 3)
     # TODO: run, stop, pause - continue : run model in coroutine, which returns next state with T(period)?
     def run(self):
         return True

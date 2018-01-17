@@ -4,13 +4,14 @@ from enum import Enum
 
 import numpy as np
 
+import copy
+
 
 class Cell:
-    def __init__(self, state, heat, T, altitude):
-        # TODO what does T mean??? Use @param for description of the parameter if it's not obvious
+    def __init__(self, state, heat, altitude):
         self.state = state
         self.heat = heat
-        self.T = T
+        self.time = 0
         self.altitude = altitude
 
         self.type = None
@@ -18,11 +19,20 @@ class Cell:
     def set_virgin_type(self, type):
         self.type = type
         if self.type.value == 0:
-            self.heat_treshold = 0.5
-            self.heat_emission = 0.5
+            self.heat_treshold = 0.3
+            self.heat_emission = 0.7
+            self.burning_period = 4
         elif self.type.value == 1:
-            self.heat_treshold = 0.4
-            self.heat_emission = 0.4
+            self.heat_treshold = 0.2
+            self.heat_emission = 0.6
+            self.burning_period = 6
+
+    def try_to_increase_burning_time(self):
+        if self.time < self.burning_period:
+            self.time += 1
+            return True
+        else:
+            return False
 
 
 class CellState(Enum):
@@ -42,7 +52,7 @@ def get_moore_neighborhood(cells_matrix, row, col):
     nb = []
 
     for x, y in ((row - 1, col - 1), (row - 1, col), (row - 1, col + 1),
-                 (row, col - 1), (row, col), (row, col + 1),
+                 (row, col - 1), (row, col + 1),
                  (row + 1, col - 1), (row + 1, col), (row + 1, col + 1)):
         if not (0 <= x < len(cells_matrix) and 0 <= y < len(cells_matrix[x])):
             continue
@@ -56,7 +66,7 @@ def generate_initial_state(rows, cols, tree_density, conifer_density):
     cells = [[0] * rows for _ in range(cols)]
     for row in range(0, rows):
         for col in range(0, cols):
-            cells[row][col] = Cell(CellState.Soil, 1, 1, 1)
+            cells[row][col] = Cell(CellState.Soil, 0.0, 1)
 
     # fill n-first elements in array, then shuffle cells in each row and each rows in whole cell-matrix
     trees_amount = int(rows * cols * tree_density)
@@ -84,7 +94,8 @@ def generate_initial_state(rows, cols, tree_density, conifer_density):
     return cells
 
 
-def apply_dump_rule(cell, hood):
+def apply_dumb_rule(cell, hood):
+    new_cell = copy.deepcopy(cell)
     if cell.state.value == 0:
         ignited_cells = 0
         for nb in hood:
@@ -92,13 +103,13 @@ def apply_dump_rule(cell, hood):
                 ignited_cells += 1
 
         if ignited_cells > 1:
-            cell.state = CellState.Ignited
+            new_cell.state = CellState.Ignited
 
     elif cell.state.value == 1:
-        cell.state = CellState.Burning
+        new_cell.state = CellState.Burning
     elif cell.state.value == 2:
-        cell.state = CellState.ColdBurned
-    return cell
+        new_cell.state = CellState.ColdBurned
+    return new_cell
 
 
 def get_next_state(cells):
@@ -108,7 +119,7 @@ def get_next_state(cells):
     # TODO extremely slowwww realisation, change to dict()
     for row in range(0, rows):
         for col in range(0, cols):
-            new_cell_state = apply_dump_rule(cells[row][col], get_moore_neighborhood(cells, row, col))
+            new_cell_state = apply_heat_rule(cells[row][col], get_moore_neighborhood(cells, row, col))
             result[row][col] = new_cell_state
 
     return result
@@ -128,3 +139,41 @@ def ignite_tree(cells_matrix, row, col):
 
     (cells_matrix[row][col]).state = CellState.Ignited
     return cells_matrix
+
+
+def increase_heat(cells_matrix, row, col):
+    if cells_matrix[row][col].type is None:
+        cells_matrix[row][col].set_virgin_type(VirginType.Hardwood)
+
+    cells_matrix[row][col].state = CellState.Virgin
+    cells_matrix[row][col].heat = 0.6
+
+    return cells_matrix
+
+
+def calculate_new_heat(cell, hood):
+    heat_value = 0.0
+
+    for nb in hood:
+        if nb.state.value == 2:
+            heat_value += nb.heat_emission
+    heat_value = heat_value / 8.0 + cell.heat
+
+    # print(heat_value)
+    return heat_value
+
+
+def apply_heat_rule(cell, hood):
+    new_cell = copy.deepcopy(cell)
+    if cell.state.value == 0:
+        new_cell.heat = calculate_new_heat(cell, hood)
+        if cell.heat > cell.heat_treshold:
+            new_cell.state = CellState.Ignited
+    elif cell.state.value == 1:
+        new_cell.state = CellState.Burning
+    elif cell.state.value == 2:
+        print(cell.time)
+        if new_cell.try_to_increase_burning_time() == False:
+            new_cell.state = CellState.ColdBurned
+
+    return new_cell
