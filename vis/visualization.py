@@ -23,7 +23,7 @@ def convert_states_to_colors(matrix):
 
 
 def run_model(steps, time_interval):
-    f = forest.ForestModel(10, 10, 1.0, steps)
+    f = forest.ForestModel(10, 10, 1.0, steps, 0.6)
     colored_states = convert_states_to_colors(f.current_state)
     fig = plt.figure()
     cmap = colors.ListedColormap(['green', 'yellow', 'red', 'black', 'black'])
@@ -48,4 +48,30 @@ def run_model(steps, time_interval):
     plt.show()
 
 
+def convert_virgin_types_to_colors(matrix):
+    rows = len(matrix)
+    cols = len(matrix[0])
+    result = np.zeros((rows, cols), dtype=int)
+    for i in range(0, rows):
+        for j in range(0, cols):
+            if matrix[i][j].state.value < 4:
+                if matrix[i][j].type.value == 0:
+                    result[i][j] = 1
+                else:
+                    result[i][j] = 2
+            else:
+                result[i][j] = 0
 
+    return result
+
+
+def show_virgin_type_map(cells):
+    colored_map = convert_virgin_types_to_colors(cells)
+
+    plt.figure()
+    cmap = colors.ListedColormap(['white', 'green', 'cyan'])
+    bounds = [0, 1, 2, 3]
+    norm = colors.BoundaryNorm(bounds, cmap.N)
+    plt.title("Virgin types map")
+    plt.imshow(colored_map, cmap=cmap, norm=norm)
+    plt.show()

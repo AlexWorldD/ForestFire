@@ -50,7 +50,7 @@ def get_moore_neighborhood(cells_matrix, row, col):
     return nb
 
 
-def generate_initial_state(rows, cols, tree_density):
+def generate_initial_state(rows, cols, tree_density, conifer_density):
     cells = [[0] * rows for _ in range(cols)]
     for row in range(0, rows):
         for col in range(0, cols):
@@ -58,12 +58,20 @@ def generate_initial_state(rows, cols, tree_density):
 
     # fill n-first elements in array, then shuffle cells in each row and each rows in whole cell-matrix
     trees_amount = int(rows * cols * tree_density)
+    conifer_amount = int(trees_amount * conifer_density)
     current_amount = 0
+
     for row in range(0, rows):
         for col in range(0, cols):
             if current_amount < trees_amount:
                 cells[col][row].state = CellState.Virgin
-                cells[col][row].set_virgin_type(VirginType.Hardwood)
+
+                # obviously hardwood_amount <= trees_amount - conifer_amount
+                if current_amount < conifer_amount:
+                    cells[col][row].set_virgin_type(VirginType.Conifer)
+                else:
+                    cells[col][row].set_virgin_type(VirginType.Hardwood)
+
                 current_amount += 1
     random.seed(datetime.now())
 
@@ -113,5 +121,9 @@ def shuffle_matrix(matrix):
 
 
 def ignite_tree(cells_matrix, row, col):
+    # TODO: fix this
+    if cells_matrix[row][col].type is None:
+        cells_matrix[row][col].set_virgin_type(VirginType.Hardwood)
+
     (cells_matrix[row][col]).state = CellState.Ignited
     return cells_matrix

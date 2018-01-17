@@ -2,11 +2,12 @@ import model.cell as cell
 
 
 class ForestModel:
-    def __init__(self, rows, cols, tree_density, steps):
+    def __init__(self, rows, cols, tree_density, steps, conifer_density):
         self.rows = rows
         self.cols = cols
         self.tree_density = tree_density
-        self.init_state = cell.generate_initial_state(rows, cols, tree_density)
+        self.conifer_density = conifer_density
+        self.init_state = cell.generate_initial_state(rows, cols, tree_density, conifer_density)
 
         self.steps = steps
         self.current_state = self.init_state
