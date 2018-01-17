@@ -1,7 +1,7 @@
 import numpy as np
 from enum import Enum
 
-model_params = {
+cell_params = {
     'igni2burn': [1, 3],
     'ember2dead': [3, 5],
 
@@ -37,7 +37,7 @@ class TreeType(Enum):
 
 
 class Cell:
-    def __init__(self, coordinates, state, altitude, size=TreeSize.normal, tree_type=TreeType.Deciduous):
+    def __init__(self, coordinates, state, altitude=0, size=TreeSize.normal, tree_type=TreeType.Deciduous):
         """
         :param coordinates:
         :param size: rough category for this tree
@@ -54,11 +54,11 @@ class Cell:
             self.type = tree_type
             self.IN_heat = self.in_heat_volume()
             self.OUT_heat = self.out_heat_volume()
-            self.evo = np.random.randint(model_params['igni2burn'][0],
-                                         model_params['igni2burn'][1])
+            self.evo = np.random.randint(cell_params['igni2burn'][0],
+                                         cell_params['igni2burn'][1])
             self.embers_heat = self.OUT_heat * 0.07
-            self.ember_time = np.random.randint(model_params['ember2dead'][0],
-                                                model_params['ember2dead'][1])
+            self.ember_time = np.random.randint(cell_params['ember2dead'][0],
+                                                cell_params['ember2dead'][1])
 
     def in_heat_volume(self):
         res = 0
@@ -70,7 +70,7 @@ class Cell:
             res = 35
         if self.type == TreeType.Hardwood:
             res = 50
-        return 8 * res * TreeSize[self.size]
+        return 8 * res * self.size.value
 
     def out_heat_volume(self):
         res = 0
@@ -82,7 +82,7 @@ class Cell:
             res = 40
         if self.type == TreeType.Hardwood:
             res = 30
-        return 8 * res * TreeSize[self.size]
+        return 8 * res * self.size.value
 
     def step(self, around_heat):
         """
