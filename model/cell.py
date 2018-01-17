@@ -1,10 +1,9 @@
+import copy
 import random
 from datetime import datetime
 from enum import Enum
 
 import numpy as np
-
-import copy
 
 
 class Cell:
@@ -62,15 +61,18 @@ def get_moore_neighborhood(cells_matrix, row, col):
 
 
 def get_moore_nb_matrix(cells_matrix, row, col):
-    nb = np.array((3, 3), dtype=Cell)
-
+    nb = np.ndarray((3, 3), dtype=Cell)
+    nb_index = 0
     for x, y in ((row - 1, col - 1), (row - 1, col), (row - 1, col + 1),
-                 (row, col - 1), (row, col + 1),
+                 (row, col - 1), (row, col), (row, col + 1),
                  (row + 1, col - 1), (row + 1, col), (row + 1, col + 1)):
+
+        nb_x, nb_y = divmod(nb_index, 3)
         if not (0 <= x < len(cells_matrix) and 0 <= y < len(cells_matrix[x])):
-            nb[x][y] = None
+            nb[nb_x][nb_y] = None
         else:
-            nb[x][y] = cells_matrix[x][y]
+            nb[nb_x][nb_y] = cells_matrix[x][y]
+        nb_index += 1
 
     return nb
 
@@ -193,26 +195,33 @@ def apply_heat_rule(cell, hood):
 
 
 def get_wind_matrix(level):
-    wind = [[1.1, 1.0, 1.0],
-            [1.3, 1.0, 0.8],
+    # TODO: we need to find values of wind matrix for different levels of wind according to Beaufort scale levels
+    wind = [[1.0, 1.0, 1.0],
+            [1.0, 1.0, 1.0],
             [1.1, 1.0, 1.0]]
+
+    if level == 3:
+        wind = [[4.0, 1.0, 0.1],
+                [5.0, 1.0, 0.1],
+                [4.0, 1.0, 0.1]]
 
     return wind
 
 
 def calculate_new_heat_with_wind(cell, hood):
     heat_emission_hood = np.zeros((3, 3), dtype=np.float32)
-    for row in hood:
-        for col in row:
-            if cell[row][col] is None or cell[row][col].state.value != 2:
+
+    rows = len(hood)
+    cols = len(hood[0])
+    for row in range(0, rows):
+        for col in range(0, cols):
+            if hood[row][col] is None or hood[row][col].state.value != 2 or row == col:
                 heat_emission_hood[row][col] = 0.0
             else:
-                heat_emission_hood[row][col] = cell[row][col].heat_emission
+                heat_emission_hood[row][col] = hood[row][col].heat_emission
 
     heat_value = np.sum(np.matmul(heat_emission_hood, get_wind_matrix(0))) / 8.0 + cell.heat
-    # heat_value = heat_value / 8.0 + cell.heat
 
-    # print(heat_value)
     return heat_value
 
 

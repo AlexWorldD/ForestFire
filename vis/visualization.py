@@ -23,7 +23,7 @@ def convert_states_to_colors(matrix):
 
 
 def run_model(steps, time_interval):
-    f = forest.ForestModel(10, 10, 0.9, steps, 0.6)
+    f = forest.ForestModel(50, 50, 1.0, steps, 0.6)
     colored_states = convert_states_to_colors(f.current_state)
     fig = plt.figure()
     cmap = colors.ListedColormap(['green', 'yellow', 'red', 'black', 'brown'])
