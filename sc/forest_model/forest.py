@@ -12,11 +12,12 @@ forest_params = {
     'TreeDensity': 1,
     'TreeDistribution': {TreeType.Deciduous: 0.3, TreeType.Conifer: 0.4, TreeType.Hardwood: 0.2},
     'MAX_STEPS': 400,
-    'InitFire': (50, 50),
+    'InitFire': (15, 20),
     'FireSize': (2, 2),
     # 0 - no wind, + left2right, - right2left
     'Wind': [2, 0],
-    'AltitudeImpact': 1.2
+    'AltitudeImpact': 1.2,
+    'FireDef': [[(10, 10), (40, 12)], [(10, 30), (40, 32)]]
 }
 
 
@@ -35,6 +36,7 @@ class ForestModel(Model):
         self.make_param('InitFireY', forest_params['InitFire'][1])
         self.make_param('WindX', forest_params['Wind'][0])
         self.make_param('WindY', forest_params['Wind'][1])
+        self.make_param('FireDefenceX', 5)
         # self.make_param('FireSize', forest_params['FireSize'])
         self.grid = np.zeros((self._param_width, self._param_height))
         self.T = 0
@@ -44,6 +46,7 @@ class ForestModel(Model):
         self.DEAD = []
         self.initial_grid()
         self.init_fire()
+        self.add_defence()
         self.update_grid()
 
     def initial_grid(self, random=True):
@@ -82,6 +85,18 @@ class ForestModel(Model):
             self.TREES[it] = Cell(it, state=CellState.Burning)
             self.FIRE[it] = self.TREES[it]
 
+    def add_defence(self):
+        # LeftUp corner
+        defence_lines = forest_params['FireDef']
+        for line in defence_lines:
+            LU = line[0]
+            # RightBottom corner
+            RB = line[1]
+            for x in range(RB[0] - LU[0]):
+                for y in range(RB[1] - LU[1]):
+                    _r = (LU[1] + y, LU[0] + x)
+                    self.TREES.pop(_r, None)
+
     def reset(self):
         """
                 Restore basic state of our CA
@@ -94,6 +109,7 @@ class ForestModel(Model):
         self.DEAD = []
         self.initial_grid()
         self.init_fire()
+        self.add_defence()
         self.update_grid()
 
     def get_fire_border(self):
@@ -142,13 +158,13 @@ class ForestModel(Model):
                 # Wind mask
                 _x = shift[1] * wind[0]
                 _y = shift[0] * wind[1]
-                if _x <0:
+                if _x < 0:
                     _heat *= (1 + abs(wind[0]))
-                if _x >0:
+                if _x > 0:
                     _heat /= (1 + abs(wind[0]))
-                if _y <0:
+                if _y < 0:
                     _heat *= (1 + abs(wind[1]))
-                if _y >0:
+                if _y > 0:
                     _heat /= (1 + abs(wind[1]))
                 HEAT += _heat
         return HEAT
