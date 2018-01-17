@@ -82,8 +82,7 @@ def generate_initial_state(rows, cols, tree_density, conifer_density):
     return cells
 
 
-def apply_rule(cell, hood):
-    # TODO: implement me
+def apply_dump_rule(cell, hood):
     if cell.state.value == 0:
         ignited_cells = 0
         for nb in hood:
@@ -107,7 +106,7 @@ def get_next_state(cells):
 
     for row in range(0, rows):
         for col in range(0, cols):
-            new_cell_state = apply_rule(cells[row][col], get_moore_neighborhood(cells, row, col))
+            new_cell_state = apply_dump_rule(cells[row][col], get_moore_neighborhood(cells, row, col))
             result[row][col] = new_cell_state
 
     return result
