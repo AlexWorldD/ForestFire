@@ -9,13 +9,13 @@ import matplotlib.pyplot as plt
 forest_params = {
     'width': 100,
     'height': 100,
-    'TreeDensity': 0.7,
+    'TreeDensity': 1,
     'TreeDistribution': {TreeType.Deciduous: 0.3, TreeType.Conifer: 0.4, TreeType.Hardwood: 0.2},
     'MAX_STEPS': 400,
-    'InitFire': (0, 0),
-    'FireSize': 2,
+    'InitFire': (50, 50),
+    'FireSize': (2, 2),
     # 0 - no wind, + left2right, - right2left
-    'Wind': [0.5, 0],
+    'Wind': [2, 0],
     'AltitudeImpact': 1.2
 }
 
@@ -23,12 +23,20 @@ forest_params = {
 class ForestModel(Model):
     def __init__(self):
         Model.__init__(self)
-        self.make_param('TreeDensity', forest_params['TreeDensity'])
-        self.width = forest_params['width']
-        self.height = forest_params['height']
-        self.treeDensity = forest_params['TreeDensity']
+        self.make_param('treeDensity', forest_params['TreeDensity'])
+        self.make_param('width', forest_params['width'])
+        self.make_param('height', forest_params['height'])
+        # self._param_width = forest_params['width']
+        # self._param_height = forest_params['height']
+        # self._param_treeDensity = forest_params['TreeDensity']
         self.treeDistribution = forest_params['TreeDistribution']
-        self.grid = np.zeros((self.width, self.height))
+        self.make_param('MAX_STEPS', forest_params['MAX_STEPS'])
+        self.make_param('InitFireX', forest_params['InitFire'][0])
+        self.make_param('InitFireY', forest_params['InitFire'][1])
+        self.make_param('WindX', forest_params['Wind'][0])
+        self.make_param('WindY', forest_params['Wind'][1])
+        # self.make_param('FireSize', forest_params['FireSize'])
+        self.grid = np.zeros((self._param_width, self._param_height))
         self.T = 0
         self.TREES = dict()
         self.FIRE = dict()
@@ -41,9 +49,11 @@ class ForestModel(Model):
     def initial_grid(self, random=True):
         # TODO add more options for varieties of trees positions
         if random:
-            trees_location = [(it // self.width, it % self.height) for it in
-                              np.random.choice(len(range(self.width * self.height)),
-                                               size=(round(self.treeDensity * self.width * self.height)),
+            trees_location = [(it // self._param_width, it % self._param_height) for it in
+                              np.random.choice(len(range(self._param_width * self._param_height)),
+                                               size=(
+                                                   round(
+                                                       self._param_treeDensity * self._param_width * self._param_height)),
                                                replace=False)]
         _st = 0
         _end = 0
@@ -63,10 +73,11 @@ class ForestModel(Model):
     def init_fire(self):
         fire = []
         f_size = forest_params['FireSize']
-        point = forest_params['InitFire']
-        for x in range(f_size + 1):
-            for y in range(f_size + 1):
-                fire.append((point[0] + x, point[1] + y))
+        point = (self._param_InitFireX, self._param_InitFireY)
+        for x in range(f_size[0] + 1):
+            for y in range(f_size[1] + 1):
+                if (x >= 0 and x < self._param_width) and (y >= 0 and y < self._param_height):
+                    fire.append((point[0] + x, point[1] + y))
         for it in fire:
             self.TREES[it] = Cell(it, state=CellState.Burning)
             self.FIRE[it] = self.TREES[it]
@@ -75,7 +86,7 @@ class ForestModel(Model):
         """
                 Restore basic state of our CA
         """
-        self.grid = np.zeros((self.width, self.height))
+        self.grid = np.zeros((self._param_width, self._param_height))
         self.T = 0
         self.TREES = dict()
         self.FIRE = dict()
@@ -92,7 +103,7 @@ class ForestModel(Model):
             for shift in neighbour:
                 n_row = item.x + shift[0]
                 n_col = item.y + shift[1]
-                if (n_row >= 0 and n_row < self.width) and (n_col >= 0 and n_col < self.height) and (
+                if (n_row >= 0 and n_row < self._param_width) and (n_col >= 0 and n_col < self._param_height) and (
                         (n_row, n_col) in self.TREES) and self.TREES[
                     (n_row, n_col)].can_burn():
                     self.BORDER[(n_row, n_col)] = self.TREES[(n_row, n_col)]
@@ -107,7 +118,7 @@ class ForestModel(Model):
         for shift in neighbour:
             n_row = coordinates[0] + shift[0]
             n_col = coordinates[1] + shift[1]
-            if (n_row >= 0 and n_row < self.width) and (n_col >= 0 and n_col < self.height) and (
+            if (n_row >= 0 and n_row < self._param_width) and (n_col >= 0 and n_col < self._param_height) and (
                     (n_row, n_col) in self.TREES):
                 nb.append((n_row, n_col))
         return nb
@@ -115,12 +126,12 @@ class ForestModel(Model):
     def get_neighborhood_heat(self, coordinates):
         # 'Wind': [0.5, 0]
         HEAT = 0
-        wind = forest_params['Wind']
+        wind = (self._param_WindX, self._param_WindY)
         neighbour = ((-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1))
         for shift in neighbour:
             n_row = coordinates[0] + shift[0]
             n_col = coordinates[1] + shift[1]
-            if (n_row >= 0 and n_row < self.width) and (n_col >= 0 and n_col < self.height) and (
+            if (n_row >= 0 and n_row < self._param_height) and (n_col >= 0 and n_col < self._param_width) and (
                     (n_row, n_col) in self.TREES):
                 # Divide by 8 due to the 8 possible directions in out CA for every Cell
                 _heat = self.TREES[(n_row, n_col)].get_heat() / 8
@@ -129,22 +140,22 @@ class ForestModel(Model):
                 if self.TREES[(n_row, n_col)].altitude > self.TREES[coordinates].altitude:
                     _heat /= forest_params['AltitudeImpact']
                 # Wind mask
-                _x = shift[0] * wind[0]
-                _y = shift[1] * wind[1]
-                if _x == -1:
+                _x = shift[1] * wind[0]
+                _y = shift[0] * wind[1]
+                if _x <0:
                     _heat *= (1 + abs(wind[0]))
-                if _x == 1:
+                if _x >0:
                     _heat /= (1 + abs(wind[0]))
-                if _y == -1:
+                if _y <0:
                     _heat *= (1 + abs(wind[1]))
-                if _y == 1:
+                if _y >0:
                     _heat /= (1 + abs(wind[1]))
                 HEAT += _heat
         return HEAT
 
     def step(self):
         self.T += 1
-        if self.T >= forest_params['MAX_STEPS']:
+        if self.T >= self._param_MAX_STEPS:
             return True
         self.get_fire_border()
         patch_in = []
@@ -190,12 +201,13 @@ class ForestModel(Model):
         # Embers = 3
         # DeadBurned = 4
         # DefTree = 5
-        #Deciduous = 0
-    # Conifer = 1
-    # Hardwood = 2
-    # DryTree = 3
-        cmap = colors.ListedColormap(['sienna', 'yellow', 'blue', 'maroon', 'black', 'palegreen', 'seagreen', 'darkgreen', 'tan',
-                                      'red', 'orangered', 'salmon'])
+        # Deciduous = 0
+        # Conifer = 1
+        # Hardwood = 2
+        # DryTree = 3
+        cmap = colors.ListedColormap(
+            ['sienna', 'yellow', 'blue', 'maroon', 'black', 'palegreen', 'seagreen', 'darkgreen', 'tan',
+             'red', 'orangered', 'salmon'])
         plt.imshow(self.grid, interpolation='none', cmap=cmap, vmax=11)
         plt.axis('image')
         # if self._update_axis:

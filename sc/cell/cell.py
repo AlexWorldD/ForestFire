@@ -125,7 +125,7 @@ class Cell:
             else:
                 return self.OUT_heat * 0.3
         if self.state == CellState.Burning:
-            self.OUT_heat *= 0.9
+            self.OUT_heat *= 0.95
             if self.OUT_heat <= 8:
                 self.state = CellState.Embers
                 return self.embers_heat
