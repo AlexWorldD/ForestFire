@@ -7,7 +7,9 @@ forest_params = {
     'TreeDistribution': {TreeType.Deciduous: 0.3, TreeType.Conifer: 0.4, TreeType.Hardwood: 0.2},
     'MAX_STEPS': 100,
     'InitFire': (0, 0),
-    'FireSize': 2
+    'FireSize': 2,
+    'Wind': [0.5, 0],
+    'AltitudeImpact': 1.2
 }
 
 
@@ -73,6 +75,9 @@ class ForestModel:
         return self.BORDER
 
     def get_neighborhood(self, coordinates):
+        # 0 0 0
+        # 0 1 0
+        # 0 0 0
         nb = []
         neighbour = ((-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1))
         for shift in neighbour:
@@ -83,6 +88,36 @@ class ForestModel:
                 nb.append((n_row, n_col))
         return nb
 
+    def get_neighborhood_heat(self, coordinates):
+        # 'Wind': [0.5, 0]
+        HEAT = 0
+        wind = forest_params['Wind']
+        neighbour = ((-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1))
+        for shift in neighbour:
+            n_row = coordinates[0] + shift[0]
+            n_col = coordinates[1] + shift[1]
+            if (n_row >= 0 and n_row < self.width) and (n_col >= 0 and n_col < self.height) and (
+                    (n_row, n_col) in self.TREES):
+                # Divide by 8 due to the 8 possible directions in out CA for every Cell
+                _heat = self.TREES[(n_row, n_col)].get_heat() / 8
+                if self.TREES[(n_row, n_col)].altitude < self.TREES[coordinates].altitude:
+                    _heat *= forest_params['AltitudeImpact']
+                if self.TREES[(n_row, n_col)].altitude > self.TREES[coordinates].altitude:
+                    _heat /= forest_params['AltitudeImpact']
+                # Wind mask
+                _x = shift[0] * wind[0]
+                _y = shift[1] * wind[1]
+                if _x == -1:
+                    _heat *= (1 + abs(wind[0]))
+                if _x == 1:
+                    _heat /= (1 + abs(wind[0]))
+                if _y == -1:
+                    _heat *= (1 + abs(wind[1]))
+                if _y == 1:
+                    _heat /= (1 + abs(wind[1]))
+                HEAT += _heat
+        return HEAT
+
     def step(self):
         self.T += 1
         self.get_fire_border()
@@ -90,7 +125,7 @@ class ForestModel:
         patch_out = []
         for key, item in self.BORDER.items():
             # TODO add wind here!
-            total_heat = sum(self.TREES[it].get_heat() for it in self.get_neighborhood(key)) / 8
+            total_heat = self.get_neighborhood_heat(key)
             if item.burn_tree(total_heat):
                 patch_in.append(key)
         for flame_key, flame_item in self.FIRE.items():
