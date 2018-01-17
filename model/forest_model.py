@@ -12,7 +12,6 @@ class ForestModel:
         self.steps = steps
         self.current_state = self.init_state
         self.current_step = 0
-
         # TODO: add start_fire() func ?
         self.current_state = cell.increase_heat(self.current_state, 2, 2)
         self.current_state = cell.increase_heat(self.current_state, 2, 3)

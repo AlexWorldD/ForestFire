@@ -61,6 +61,20 @@ def get_moore_neighborhood(cells_matrix, row, col):
     return nb
 
 
+def get_moore_nb_matrix(cells_matrix, row, col):
+    nb = np.array((3, 3), dtype=Cell)
+
+    for x, y in ((row - 1, col - 1), (row - 1, col), (row - 1, col + 1),
+                 (row, col - 1), (row, col + 1),
+                 (row + 1, col - 1), (row + 1, col), (row + 1, col + 1)):
+        if not (0 <= x < len(cells_matrix) and 0 <= y < len(cells_matrix[x])):
+            nb[x][y] = None
+        else:
+            nb[x][y] = cells_matrix[x][y]
+
+    return nb
+
+
 def generate_initial_state(rows, cols, tree_density, conifer_density):
     cells = [[0] * rows for _ in range(cols)]
     for row in range(0, rows):
@@ -118,7 +132,7 @@ def get_next_state(cells):
 
     for row in range(0, rows):
         for col in range(0, cols):
-            new_cell_state = apply_heat_rule(cells[row][col], get_moore_neighborhood(cells, row, col))
+            new_cell_state = apply_heat_with_wind_rule(cells[row][col], get_moore_nb_matrix(cells, row, col))
             result[row][col] = new_cell_state
 
     return result
@@ -166,6 +180,46 @@ def apply_heat_rule(cell, hood):
     new_cell = copy.deepcopy(cell)
     if cell.state.value == 0:
         new_cell.heat = calculate_new_heat(cell, hood)
+        if cell.heat > cell.heat_treshold:
+            new_cell.state = CellState.Ignited
+    elif cell.state.value == 1:
+        new_cell.state = CellState.Burning
+    elif cell.state.value == 2:
+        print(cell.time)
+        if new_cell.try_to_increase_burning_time() == False:
+            new_cell.state = CellState.ColdBurned
+
+    return new_cell
+
+
+def get_wind_matrix(level):
+    wind = [[1.1, 1.0, 1.0],
+            [1.3, 1.0, 0.8],
+            [1.1, 1.0, 1.0]]
+
+    return wind
+
+
+def calculate_new_heat_with_wind(cell, hood):
+    heat_emission_hood = np.zeros((3, 3), dtype=np.float32)
+    for row in hood:
+        for col in row:
+            if cell[row][col] is None or cell[row][col].state.value != 2:
+                heat_emission_hood[row][col] = 0.0
+            else:
+                heat_emission_hood[row][col] = cell[row][col].heat_emission
+
+    heat_value = np.sum(np.matmul(heat_emission_hood, get_wind_matrix(0))) / 8.0 + cell.heat
+    # heat_value = heat_value / 8.0 + cell.heat
+
+    # print(heat_value)
+    return heat_value
+
+
+def apply_heat_with_wind_rule(cell, hood):
+    new_cell = copy.deepcopy(cell)
+    if cell.state.value == 0:
+        new_cell.heat = calculate_new_heat_with_wind(cell, hood)
         if cell.heat > cell.heat_treshold:
             new_cell.state = CellState.Ignited
     elif cell.state.value == 1:
