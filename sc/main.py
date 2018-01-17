@@ -2,7 +2,7 @@ from forest_model import *
 
 if __name__ == '__main__':
     test = ForestModel()
-    for _ in range(10):
+    for i in range(100):
         test.step()
-        print(test.grid)
+        print(i, test.grid)
     print('t')

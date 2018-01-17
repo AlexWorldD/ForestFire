@@ -4,7 +4,6 @@ from enum import Enum
 cell_params = {
     'igni2burn': [1, 3],
     'ember2dead': [3, 5],
-
 }
 
 

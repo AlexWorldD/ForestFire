@@ -1,8 +1,8 @@
 from cell import *
 
 forest_params = {
-    'width': 5,
-    'height': 5,
+    'width': 100,
+    'height': 100,
     'TreeDensity': 1,
     'TreeDistribution': {TreeType.Deciduous: 0.3, TreeType.Conifer: 0.4, TreeType.Hardwood: 0.2},
     'MAX_STEPS': 100,
