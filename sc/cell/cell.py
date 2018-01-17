@@ -156,3 +156,16 @@ class Cell:
             return self.embers_heat
         if self.state == CellState.Soil or self.state == CellState.DeadBurned:
             return 0
+
+    def get_color(self):
+        if self.state == CellState.DefTree:
+            return 5 + self.type.value
+        if self.state == CellState.Burning:
+            if self.OUT_heat > 200:
+                return 9
+            elif self.OUT_heat < 100:
+                return 11
+            else:
+                return 10
+        else:
+            return self.state.value

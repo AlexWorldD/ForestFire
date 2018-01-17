@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 forest_params = {
     'width': 100,
     'height': 100,
-    'TreeDensity': 1,
+    'TreeDensity': 0.7,
     'TreeDistribution': {TreeType.Deciduous: 0.3, TreeType.Conifer: 0.4, TreeType.Hardwood: 0.2},
     'MAX_STEPS': 400,
     'InitFire': (0, 0),
@@ -36,6 +36,7 @@ class ForestModel(Model):
         self.DEAD = []
         self.initial_grid()
         self.init_fire()
+        self.update_grid()
 
     def initial_grid(self, random=True):
         # TODO add more options for varieties of trees positions
@@ -82,6 +83,7 @@ class ForestModel(Model):
         self.DEAD = []
         self.initial_grid()
         self.init_fire()
+        self.update_grid()
 
     def get_fire_border(self):
         self.BORDER = dict()
@@ -168,7 +170,7 @@ class ForestModel(Model):
         # TODO add patch techniques, not the full update
         # 0 already means soil
         for key, item in self.TREES.items():
-            self.grid[key[0]][key[1]] = item.state.value
+            self.grid[key[0]][key[1]] = item.get_color()
         for it in self.DEAD:
             self.grid[it[0]][it[1]] = 4
 
@@ -188,8 +190,13 @@ class ForestModel(Model):
         # Embers = 3
         # DeadBurned = 4
         # DefTree = 5
-        cmap = colors.ListedColormap(['sienna', 'yellow', 'red', 'maroon', 'black', 'seagreen'])
-        plt.imshow(self.grid, interpolation='none', cmap=cmap)
+        #Deciduous = 0
+    # Conifer = 1
+    # Hardwood = 2
+    # DryTree = 3
+        cmap = colors.ListedColormap(['sienna', 'yellow', 'blue', 'maroon', 'black', 'palegreen', 'seagreen', 'darkgreen', 'tan',
+                                      'red', 'orangered', 'salmon'])
+        plt.imshow(self.grid, interpolation='none', cmap=cmap, vmax=11)
         plt.axis('image')
         # if self._update_axis:
         #     self._update_axis=False
