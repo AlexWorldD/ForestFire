@@ -1,6 +1,7 @@
 from cell import *
 from pyics import *
 import matplotlib
+from matplotlib import colors
 
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
@@ -10,7 +11,7 @@ forest_params = {
     'height': 100,
     'TreeDensity': 1,
     'TreeDistribution': {TreeType.Deciduous: 0.3, TreeType.Conifer: 0.4, TreeType.Hardwood: 0.2},
-    'MAX_STEPS': 100,
+    'MAX_STEPS': 400,
     'InitFire': (0, 0),
     'FireSize': 2,
     # 0 - no wind, + left2right, - right2left
@@ -181,8 +182,14 @@ class ForestModel(Model):
         # plt.axis(self._axis_limits)
         # if not plt.gca().yaxis_inverted():
         #     plt.gca().invert_yaxis()
-        plt.imshow(self.grid, interpolation='none', vmin=0, vmax=2,
-                   cmap=matplotlib.cm.binary)
+        # Soil = 0
+        # Ignited = 1
+        # Burning = 2
+        # Embers = 3
+        # DeadBurned = 4
+        # DefTree = 5
+        cmap = colors.ListedColormap(['sienna', 'yellow', 'red', 'maroon', 'black', 'seagreen'])
+        plt.imshow(self.grid, interpolation='none', cmap=cmap)
         plt.axis('image')
         # if self._update_axis:
         #     self._update_axis=False
