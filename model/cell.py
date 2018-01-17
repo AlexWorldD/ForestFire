@@ -4,6 +4,8 @@ from enum import Enum
 
 import numpy as np
 
+import copy
+
 
 class Cell:
     def __init__(self, state, heat, T, altitude):
@@ -82,7 +84,8 @@ def generate_initial_state(rows, cols, tree_density, conifer_density):
     return cells
 
 
-def apply_dump_rule(cell, hood):
+def apply_dumb_rule(cell, hood):
+    new_cell = copy.deepcopy(cell)
     if cell.state.value == 0:
         ignited_cells = 0
         for nb in hood:
@@ -90,13 +93,13 @@ def apply_dump_rule(cell, hood):
                 ignited_cells += 1
 
         if ignited_cells > 1:
-            cell.state = CellState.Ignited
+            new_cell.state = CellState.Ignited
 
     elif cell.state.value == 1:
-        cell.state = CellState.Burning
+        new_cell.state = CellState.Burning
     elif cell.state.value == 2:
-        cell.state = CellState.ColdBurned
-    return cell
+        new_cell.state = CellState.ColdBurned
+    return new_cell
 
 
 def get_next_state(cells):
@@ -106,7 +109,7 @@ def get_next_state(cells):
 
     for row in range(0, rows):
         for col in range(0, cols):
-            new_cell_state = apply_dump_rule(cells[row][col], get_moore_neighborhood(cells, row, col))
+            new_cell_state = apply_dumb_rule(cells[row][col], get_moore_neighborhood(cells, row, col))
             result[row][col] = new_cell_state
 
     return result
