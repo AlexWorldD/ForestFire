@@ -1,4 +1,9 @@
 from cell import *
+from pyics import *
+import matplotlib
+
+matplotlib.use('TkAgg')
+import matplotlib.pyplot as plt
 
 forest_params = {
     'width': 100,
@@ -8,13 +13,16 @@ forest_params = {
     'MAX_STEPS': 100,
     'InitFire': (0, 0),
     'FireSize': 2,
+    # 0 - no wind, + left2right, - right2left
     'Wind': [0.5, 0],
     'AltitudeImpact': 1.2
 }
 
 
-class ForestModel:
+class ForestModel(Model):
     def __init__(self):
+        Model.__init__(self)
+        self.make_param('TreeDensity', forest_params['TreeDensity'])
         self.width = forest_params['width']
         self.height = forest_params['height']
         self.treeDensity = forest_params['TreeDensity']
@@ -60,6 +68,19 @@ class ForestModel:
         for it in fire:
             self.TREES[it] = Cell(it, state=CellState.Burning)
             self.FIRE[it] = self.TREES[it]
+
+    def reset(self):
+        """
+                Restore basic state of our CA
+        """
+        self.grid = np.zeros((self.width, self.height))
+        self.T = 0
+        self.TREES = dict()
+        self.FIRE = dict()
+        self.BORDER = dict()
+        self.DEAD = []
+        self.initial_grid()
+        self.init_fire()
 
     def get_fire_border(self):
         self.BORDER = dict()
@@ -120,11 +141,12 @@ class ForestModel:
 
     def step(self):
         self.T += 1
+        if self.T >= forest_params['MAX_STEPS']:
+            return True
         self.get_fire_border()
         patch_in = []
         patch_out = []
         for key, item in self.BORDER.items():
-            # TODO add wind here!
             total_heat = self.get_neighborhood_heat(key)
             if item.burn_tree(total_heat):
                 patch_in.append(key)
@@ -148,3 +170,21 @@ class ForestModel:
             self.grid[key[0]][key[1]] = item.state.value
         for it in self.DEAD:
             self.grid[it[0]][it[1]] = 4
+
+    def draw(self):
+        """Draws the current state of the grid."""
+        plt.cla()
+        # if self._update_axis:
+        #     self._update_axis = False
+        #     _tmp = [0, self.width, self._axis_limits[3], self._axis_limits[3] + self.height]
+        #     self._axis_limits = _tmp
+        # plt.axis(self._axis_limits)
+        # if not plt.gca().yaxis_inverted():
+        #     plt.gca().invert_yaxis()
+        plt.imshow(self.grid, interpolation='none', vmin=0, vmax=2,
+                   cmap=matplotlib.cm.binary)
+        plt.axis('image')
+        # if self._update_axis:
+        #     self._update_axis=False
+        #     plt.set_ybound(100, 150)
+        plt.title('t = %d' % self.T)
