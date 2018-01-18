@@ -17,6 +17,7 @@ forest_params = {
     # 0 - no wind, + left2right, - right2left
     'Wind': [2, 0],
     'AltitudeImpact': 1.2,
+    # 'FireDef': []
     'FireDef': [[(10, 10), (40, 12)], [(10, 30), (40, 32)]]
 }
 
@@ -88,14 +89,15 @@ class ForestModel(Model):
     def add_defence(self):
         # LeftUp corner
         defence_lines = forest_params['FireDef']
-        for line in defence_lines:
-            LU = line[0]
-            # RightBottom corner
-            RB = line[1]
-            for x in range(RB[0] - LU[0]):
-                for y in range(RB[1] - LU[1]):
-                    _r = (LU[1] + y, LU[0] + x)
-                    self.TREES.pop(_r, None)
+        if len(defence_lines)>0:
+            for line in defence_lines:
+                LU = line[0]
+                # RightBottom corner
+                RB = line[1]
+                for x in range(RB[0] - LU[0]):
+                    for y in range(RB[1] - LU[1]):
+                        _r = (LU[1] + y, LU[0] + x)
+                        self.TREES.pop(_r, None)
 
     def reset(self):
         """
@@ -224,7 +226,7 @@ class ForestModel(Model):
         cmap = colors.ListedColormap(
             ['sienna', 'yellow', 'blue', 'maroon', 'black', 'palegreen', 'seagreen', 'darkgreen', 'tan',
              'red', 'orangered', 'salmon'])
-        plt.imshow(self.grid, interpolation='none', cmap=cmap, vmax=11)
+        plt.imshow(self.grid, interpolation='none', cmap=cmap, vmin=0, vmax=11)
         plt.axis('image')
         # if self._update_axis:
         #     self._update_axis=False
