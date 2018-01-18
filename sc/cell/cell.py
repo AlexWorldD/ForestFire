@@ -3,7 +3,7 @@ from enum import Enum
 
 cell_params = {
     'igni2burn': [1, 3],
-    'ember2dead': [3, 5],
+    'ember2dead': [3, 10],
 }
 
 
@@ -75,7 +75,7 @@ class Cell:
         if self.type == TreeType.Deciduous:
             res = 35
         if self.type == TreeType.Hardwood:
-            res = 50
+            res = 70
         return 8 * res * self.size.value
 
     def out_heat_volume(self):
@@ -83,11 +83,11 @@ class Cell:
         if self.type == TreeType.DryTree:
             res = 40
         if self.type == TreeType.Conifer:
-            res = 45
+            res = 80
         if self.type == TreeType.Deciduous:
             res = 40
         if self.type == TreeType.Hardwood:
-            res = 30
+            res = 100
         return 8 * res * self.size.value
 
     def burn_tree(self, around_heat=0):

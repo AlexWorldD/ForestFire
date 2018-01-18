@@ -10,7 +10,7 @@ forest_params = {
     'width': 100,
     'height': 100,
     'TreeDensity': 1,
-    'TreeDistribution': {TreeType.Deciduous: 0.3, TreeType.Conifer: 0.4, TreeType.Hardwood: 0.2},
+    'TreeDistribution': {TreeType.Deciduous: 0.3, TreeType.Conifer: 0.5, TreeType.Hardwood: 0.2},
     'MAX_STEPS': 400,
     'InitFire': (15, 20),
     'FireSize': (2, 2),
