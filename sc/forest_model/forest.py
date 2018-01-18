@@ -18,7 +18,7 @@ forest_params = {
     'Wind': [2, 0],
     'AltitudeImpact': 1.2,
     # 'FireDef': []
-    'FireDef': [[(10, 10), (40, 12)], [(10, 30), (40, 32)]]
+    'FireDef': [[(10, 10), (80, 12)], [(10, 30), (80, 32)]]
 }
 
 
@@ -37,7 +37,7 @@ class ForestModel(Model):
         self.make_param('InitFireY', forest_params['InitFire'][1])
         self.make_param('WindX', forest_params['Wind'][0])
         self.make_param('WindY', forest_params['Wind'][1])
-        self.make_param('FireDefenceX', 5)
+        self.make_param('FireDefenceX', 0)
         # self.make_param('FireSize', forest_params['FireSize'])
         self.grid = np.zeros((self._param_width, self._param_height))
         self.T = 0
@@ -89,7 +89,7 @@ class ForestModel(Model):
     def add_defence(self):
         # LeftUp corner
         defence_lines = forest_params['FireDef']
-        if len(defence_lines)>0:
+        if self._param_FireDefenceX > 0:
             for line in defence_lines:
                 LU = line[0]
                 # RightBottom corner
