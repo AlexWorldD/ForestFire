@@ -9,10 +9,10 @@ import matplotlib.pyplot as plt
 forest_params = {
     'width': 100,
     'height': 100,
-    'TreeDensity': 1,
+    'TreeDensity': 1.0,
     'TreeDistribution': {TreeType.Deciduous: 0.3, TreeType.Conifer: 0.5, TreeType.Hardwood: 0.2},
     'MAX_STEPS': 400,
-    'InitFire': (15, 20),
+    'InitFire': (0, 0),
     'FireSize': (2, 2),
     # 0 - no wind, + left2right, - right2left
     'Wind': [2, 0],
