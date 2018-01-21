@@ -38,6 +38,14 @@ class ForestModel(Model):
         self.make_param('WindX', forest_params['Wind'][0])
         self.make_param('WindY', forest_params['Wind'][1])
         self.make_param('FireDefenceX', 0)
+        # Trees - total number of trees, Border - number of trees on the border of forestfire
+        # Burned - number of trees which has burned at the last step (something like N per step), BUT Dead - total number of burned trees at this step
+        self.measurements = {'Trees': [],
+                             'Border': [],
+                             'Ignited': [],
+                             'Burned': [],
+                             'Fire': [],
+                             'Dead': []}
         # self.make_param('FireSize', forest_params['FireSize'])
         self.grid = np.zeros((self._param_width, self._param_height))
         self.T = 0
@@ -49,6 +57,10 @@ class ForestModel(Model):
         self.init_fire()
         self.add_defence()
         self.update_grid()
+        self.measurements['Ignited'].append(0)
+        self.measurements['Burned'].append(0)
+        self.measurements['Dead'].append(0)
+        self.measurements['Border'].append(0)
 
     def initial_grid(self, random=True):
         # TODO add more options for varieties of trees positions
@@ -73,6 +85,7 @@ class ForestModel(Model):
         if _st <= len(trees_location):
             for it in trees_location[_st:-1]:
                 self.TREES[it] = Cell(it, state=CellState.DefTree, tree_type=TreeType.Deciduous)
+        self.measurements['Trees'].append(len(self.TREES))
 
     def init_fire(self):
         fire = []
@@ -85,6 +98,7 @@ class ForestModel(Model):
         for it in fire:
             self.TREES[it] = Cell(it, state=CellState.Burning)
             self.FIRE[it] = self.TREES[it]
+        self.measurements['Fire'].append(len(self.FIRE))
 
     def add_defence(self):
         # LeftUp corner
@@ -113,6 +127,19 @@ class ForestModel(Model):
         self.init_fire()
         self.add_defence()
         self.update_grid()
+        # Reset stats for model
+        self.measurements = {'Trees': [],
+                             'Border': [],
+                             'Ignited': [],
+                             'Burned': [],
+                             'Fire': [],
+                             'Dead': []}
+        self.measurements['Ignited'].append(0)
+        self.measurements['Burned'].append(0)
+        self.measurements['Border'].append(0)
+        self.measurements['Dead'].append(0)
+        self.measurements['Trees'].append(len(self.TREES))
+        self.measurements['Fire'].append(len(self.FIRE))
 
     def get_fire_border(self):
         self.BORDER = dict()
@@ -176,22 +203,31 @@ class ForestModel(Model):
         if self.T >= self._param_MAX_STEPS:
             return True
         self.get_fire_border()
+        self.measurements['Border'].append(len(self.BORDER))
         patch_in = []
         patch_out = []
         for key, item in self.BORDER.items():
             total_heat = self.get_neighborhood_heat(key)
             if item.burn_tree(total_heat):
                 patch_in.append(key)
+        #         Add as measure the number of new ignited trees
+        self.measurements['Ignited'].append(len(patch_in))
         for flame_key, flame_item in self.FIRE.items():
             if flame_item.step() == 0:
                 # Tree has already burned
                 patch_out.append(flame_key)
                 # Update burned trees now
+        self.measurements['Burned'].append(len(patch_out))
         for i in patch_out:
-            del self.FIRE[i]
+            self.TREES.pop(i, None)
+            # del self.FIRE[i]
         for i in patch_in:
             self.FIRE[i] = self.BORDER[i]
+
+        self.measurements['Fire'].append(len(self.FIRE))
         self.DEAD.extend(patch_out)
+        self.measurements['Dead'].append(len(self.DEAD))
+        self.measurements['Trees'].append(len(self.TREES))
         # TODO we can call update_grid with settled interval, add to model_param
         self.update_grid()
 
