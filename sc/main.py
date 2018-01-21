@@ -26,11 +26,13 @@ def get_density(args):
     for _ in tqdm(range(samples)):
         "Getting new random initial row"
         model.reset()
-        for i in range(200):
-            print(i)
+        for i in range(250):
             model.step()
         #     For additional INFO change HERE
-        results.append(model.measurements['Dead'][-1] / model.measurements['Trees'][0])
+        if cur_density == 0.0:
+            results.append(0)
+        else:
+            results.append(model.measurements['Dead'][-1] / model.measurements['Trees'][0])
     print('Elapsed time: ', time.time() - st)
     return cur_density, results
 
@@ -73,37 +75,39 @@ if __name__ == '__main__':
     # gui.start()
 
     # ------ PART I - Calculate different measurements ------
-    # test = ForestModel()
-    # for i in range(200):
-    #     print(i)
-    #     test.step()
-    # RESULT = test.measurements
-    # try:
-    #     with open('ResultsMeasure.raw', 'w') as outfile:
-    #         json.dump(RESULT, outfile)
-    # except:
-    #     pass
-    # plot_graphs(feature='Dead', data=RESULT)
-    # plot_graphs(feature='Border', data=RESULT)
+    test = ForestModel()
+    for i in range(250):
+        print(i)
+        test.step()
+    RESULT = test.measurements
+    try:
+        with open('ResultsMeasure.raw', 'w') as outfile:
+            json.dump(RESULT, outfile)
+    except:
+        pass
+    plot_graphs(feature='Dead', data=RESULT)
+    plot_graphs(feature='Border', data=RESULT)
 
     # ------ PART II - Calculate different features for specific density values ------
-    start = time.time()
-    density = np.linspace(0.9, 1, 2)
-    # ----MAGIC HERE----
-    # PARALLEL VERSION
-    p = Pool(8)
-    RESULT = p.map(get_density, density)
-    p.close()
-    print(RESULT)
-    end = time.time()
-    print('TOTAL TIME: ', end - start, 's')
-    with open('ResultsDensity.raw', 'w') as outfile:
-        json.dump(RESULT, outfile)
+    # start = time.time()
+    # density = np.linspace(0, 1, 32)
+    # # ----MAGIC HERE----
+    # # PARALLEL VERSION
+    # p = Pool(8)
+    # RESULT = p.map(get_density, density)
+    # p.close()
+    # print(RESULT)
+    # end = time.time()
+    # print('TOTAL TIME: ', end - start, 's')
+    # with open('ResultsDensity.raw', 'w') as outfile:
+    #     json.dump(RESULT, outfile)
 
     # ------ PART III - PLOT Results ------
     # with open('ResultsDensity.raw') as data_file:
     #     data = json.load(data_file)
-    #
+    # #     TODO change size here for comparing with font-size in the Report
+    # sns.set(font_scale=1.5)
+    # sns.set_style("whitegrid")
     # _to_plot = {'x': [],
     #             'y': []}
     # for denc in data:
@@ -111,12 +115,10 @@ if __name__ == '__main__':
     #     _to_plot['y'].extend(denc[1])
     #
     # f, ax = plt.subplots(figsize=(12, 8))
-    # plt.scatter(_to_plot['x'], _to_plot['y'], alpha=0.3)
-    # _text = 'Density' \
-    #         '\nWidth=100, the rule #184, T=1e+4' \
-    #         '\nGraph above is showing the increasing tendency from density 0 to density 0.5 and decreasing later'
-    # ax.set(xlabel=_text, ylabel='Car flow (cars/1000 steps)')
+    # plt.scatter(_to_plot['x'], _to_plot['y'], alpha=0.4, color='red')
+    # _text = 'Density'
+    # ax.set(xlabel=_text, ylabel='Burned trees')
     # plt.xticks([x for x in np.linspace(0, 1, 11)])
     # plt.legend()
-    # plt.savefig('FlowQ4.png', bbox_inches='tight', dpi=1200)
     # plt.show()
+    # plt.savefig('TreeDensity.png', bbox_inches='tight', dpi=1200)

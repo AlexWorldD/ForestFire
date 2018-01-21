@@ -11,7 +11,7 @@ forest_params = {
     'height': 100,
     'TreeDensity': 1.0,
     'TreeDistribution': {TreeType.Deciduous: 0.3, TreeType.Conifer: 0.5, TreeType.Hardwood: 0.2},
-    'MAX_STEPS': 200,
+    'MAX_STEPS': 300,
     'InitFire': (0, 0),
     'FireSize': (2, 2),
     # 0 - no wind, + left2right, - right2left
@@ -220,6 +220,7 @@ class ForestModel(Model):
         self.measurements['Burned'].append(len(patch_out))
         for i in patch_out:
             self.TREES.pop(i, None)
+            self.FIRE.pop(i, None)
             self.DEAD[i] = 0
             # del self.FIRE[i]
         for i in patch_in:
