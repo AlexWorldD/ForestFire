@@ -11,7 +11,7 @@ forest_params = {
     'height': 100,
     'TreeDensity': 1.0,
     'TreeDistribution': {TreeType.Deciduous: 0.3, TreeType.Conifer: 0.5, TreeType.Hardwood: 0.2},
-    'MAX_STEPS': 300,
+    'MAX_STEPS': 500,
     'InitFire': (0, 0),
     'FireSize': (2, 2),
     # 0 - no wind, + left2right, - right2left
@@ -227,13 +227,44 @@ class ForestModel(Model):
             self.FIRE[i] = self.BORDER[i]
 
         self.measurements['Fire'].append(len(self.FIRE))
-        # self.DEAD.extend(patch_out)
-        # if self.T==150:
-        #     print('t')
         self.measurements['Dead'].append(len(self.DEAD))
         self.measurements['Trees'].append(len(self.TREES))
         # TODO we can call update_grid with settled interval, add to model_param
         self.update_grid()
+
+    def step_v2(self):
+        self.T += 1
+        self.get_fire_border()
+        self.measurements['Border'].append(len(self.BORDER))
+        patch_in = []
+        patch_out = []
+        for key, item in self.BORDER.items():
+            total_heat = self.get_neighborhood_heat(key)
+            if item.burn_tree(total_heat):
+                patch_in.append(key)
+        #         Add as measure the number of new ignited trees
+        self.measurements['Ignited'].append(len(patch_in))
+        for flame_key, flame_item in self.FIRE.items():
+            if flame_item.step() == 0:
+                # Tree has already burned
+                patch_out.append(flame_key)
+                # Update burned trees now
+        self.measurements['Burned'].append(len(patch_out))
+        for i in patch_out:
+            self.TREES.pop(i, None)
+            self.FIRE.pop(i, None)
+            self.DEAD[i] = 0
+            # del self.FIRE[i]
+        for i in patch_in:
+            self.FIRE[i] = self.BORDER[i]
+
+        self.measurements['Fire'].append(len(self.FIRE))
+        self.measurements['Dead'].append(len(self.DEAD))
+        self.measurements['Trees'].append(len(self.TREES))
+        if len(self.FIRE)==0:
+            return False
+        else:
+            return True
 
     def update_grid(self):
         # TODO add patch techniques, not the full update

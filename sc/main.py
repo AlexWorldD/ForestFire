@@ -26,8 +26,8 @@ def get_density(args):
     for _ in tqdm(range(samples)):
         "Getting new random initial row"
         model.reset()
-        for i in range(250):
-            model.step()
+        while model.step_v2():
+            continue
         #     For additional INFO change HERE
         if cur_density == 0.0:
             results.append(0)
@@ -116,6 +116,7 @@ if __name__ == '__main__':
 
     f, ax = plt.subplots(figsize=(12, 8))
     plt.scatter(_to_plot['x'], _to_plot['y'], alpha=0.4, color='red')
+    ax.axvline(x=.52, ymin=0.0, ymax=1, color='lightgrey', linestyle='--', label='Theoretical critical density')
     _text = 'Density'
     ax.set(xlabel=_text, ylabel='Burned trees')
     plt.xticks([x for x in np.linspace(0, 1, 11)])
