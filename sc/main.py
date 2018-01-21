@@ -89,21 +89,21 @@ if __name__ == '__main__':
     # plot_graphs(feature='Border', data=RESULT)
 
     # ------ PART II - Calculate different features for specific density values ------
-    # start = time.time()
-    # density = np.linspace(0, 1, 32)
-    # # ----MAGIC HERE----
-    # # PARALLEL VERSION
-    # p = Pool(8)
-    # RESULT = p.map(get_density, density)
-    # p.close()
-    # print(RESULT)
-    # end = time.time()
-    # print('TOTAL TIME: ', end - start, 's')
-    # with open('ResultsDensity.raw', 'w') as outfile:
-    #     json.dump(RESULT, outfile)
+    start = time.time()
+    density = np.linspace(0, 1, 32)
+    # ----MAGIC HERE----
+    # PARALLEL VERSION
+    p = Pool(8)
+    RESULT = p.map(get_density, density)
+    p.close()
+    print(RESULT)
+    end = time.time()
+    print('TOTAL TIME: ', end - start, 's')
+    with open('ResultsConiferDensity.raw', 'w') as outfile:
+        json.dump(RESULT, outfile)
 
     # ------ PART III - PLOT Results ------
-    with open('ResultsDensity.raw') as data_file:
+    with open('ResultsConiferDensity.raw') as data_file:
         data = json.load(data_file)
     #     TODO change size here for comparing with font-size in the Report
     sns.set(font_scale=1.5)
@@ -122,4 +122,4 @@ if __name__ == '__main__':
     plt.xticks([x for x in np.linspace(0, 1, 11)])
     plt.legend()
     # plt.show()
-    plt.savefig('TreeDensity.png', bbox_inches='tight', dpi=1200)
+    plt.savefig('TreeConiferDensity.png', bbox_inches='tight', dpi=1200)
