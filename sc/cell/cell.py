@@ -135,7 +135,7 @@ class Cell:
             self.ember_time -= 1
             if self.ember_time <= 0:
                 self.state = CellState.DeadBurned
-                return 0
+                return 1
             else:
                 return self.embers_heat
         if self.state == CellState.Soil or self.state == CellState.DeadBurned:
