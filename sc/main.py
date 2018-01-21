@@ -70,9 +70,9 @@ def plot_graphs(file_name='ResultsMeasure.raw', feature='Ignited', data=False):
 
 if __name__ == '__main__':
     # ------ PART 0 - Model with GUI ------
-    # test = ForestModel()
-    # gui = GUI(test)
-    # gui.start()
+    test = ForestModel()
+    gui = GUI(test)
+    gui.start()
 
     # ------ PART I - Calculate different measurements ------
     # test = ForestModel()
@@ -89,37 +89,37 @@ if __name__ == '__main__':
     # plot_graphs(feature='Border', data=RESULT)
 
     # ------ PART II - Calculate different features for specific density values ------
-    start = time.time()
-    density = np.linspace(0, 1, 32)
-    # ----MAGIC HERE----
-    # PARALLEL VERSION
-    p = Pool(8)
-    RESULT = p.map(get_density, density)
-    p.close()
-    print(RESULT)
-    end = time.time()
-    print('TOTAL TIME: ', end - start, 's')
-    with open('ResultsConiferDensity.raw', 'w') as outfile:
-        json.dump(RESULT, outfile)
+    # start = time.time()
+    # density = np.linspace(0, 1, 32)
+    # # ----MAGIC HERE----
+    # # PARALLEL VERSION
+    # p = Pool(8)
+    # RESULT = p.map(get_density, density)
+    # p.close()
+    # print(RESULT)
+    # end = time.time()
+    # print('TOTAL TIME: ', end - start, 's')
+    # with open('ResultsConiferDensity.raw', 'w') as outfile:
+    #     json.dump(RESULT, outfile)
 
     # ------ PART III - PLOT Results ------
-    with open('ResultsConiferDensity.raw') as data_file:
-        data = json.load(data_file)
-    #     TODO change size here for comparing with font-size in the Report
-    sns.set(font_scale=1.5)
-    sns.set_style("whitegrid")
-    _to_plot = {'x': [],
-                'y': []}
-    for denc in data:
-        _to_plot['x'].extend([denc[0]] * len(denc[1]))
-        _to_plot['y'].extend(denc[1])
-
-    f, ax = plt.subplots(figsize=(12, 8))
-    plt.scatter(_to_plot['x'], _to_plot['y'], alpha=0.4, color='red')
-    ax.axvline(x=.52, ymin=0.0, ymax=1, color='lightgrey', linestyle='--', label='Theoretical critical density')
-    _text = 'Density'
-    ax.set(xlabel=_text, ylabel='Burned trees')
-    plt.xticks([x for x in np.linspace(0, 1, 11)])
-    plt.legend()
-    # plt.show()
-    plt.savefig('TreeConiferDensity.png', bbox_inches='tight', dpi=1200)
+    # with open('ResultsConiferDensity.raw') as data_file:
+    #     data = json.load(data_file)
+    # #     TODO change size here for comparing with font-size in the Report
+    # sns.set(font_scale=1.5)
+    # sns.set_style("whitegrid")
+    # _to_plot = {'x': [],
+    #             'y': []}
+    # for denc in data:
+    #     _to_plot['x'].extend([denc[0]] * len(denc[1]))
+    #     _to_plot['y'].extend(denc[1])
+    #
+    # f, ax = plt.subplots(figsize=(12, 8))
+    # plt.scatter(_to_plot['x'], _to_plot['y'], alpha=0.4, color='red')
+    # ax.axvline(x=.52, ymin=0.0, ymax=1, color='lightgrey', linestyle='--', label='Theoretical critical density')
+    # _text = 'Density'
+    # ax.set(xlabel=_text, ylabel='Burned trees')
+    # plt.xticks([x for x in np.linspace(0, 1, 11)])
+    # plt.legend()
+    # # plt.show()
+    # plt.savefig('TreeConiferDensity.png', bbox_inches='tight', dpi=1200)
