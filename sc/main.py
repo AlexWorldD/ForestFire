@@ -75,18 +75,18 @@ if __name__ == '__main__':
     # gui.start()
 
     # ------ PART I - Calculate different measurements ------
-    test = ForestModel()
-    for i in range(250):
-        print(i)
-        test.step()
-    RESULT = test.measurements
-    try:
-        with open('ResultsMeasure.raw', 'w') as outfile:
-            json.dump(RESULT, outfile)
-    except:
-        pass
-    plot_graphs(feature='Dead', data=RESULT)
-    plot_graphs(feature='Border', data=RESULT)
+    # test = ForestModel()
+    # for i in range(250):
+    #     print(i)
+    #     test.step()
+    # RESULT = test.measurements
+    # try:
+    #     with open('ResultsMeasure.raw', 'w') as outfile:
+    #         json.dump(RESULT, outfile)
+    # except:
+    #     pass
+    # plot_graphs(feature='Dead', data=RESULT)
+    # plot_graphs(feature='Border', data=RESULT)
 
     # ------ PART II - Calculate different features for specific density values ------
     # start = time.time()
@@ -103,22 +103,22 @@ if __name__ == '__main__':
     #     json.dump(RESULT, outfile)
 
     # ------ PART III - PLOT Results ------
-    # with open('ResultsDensity.raw') as data_file:
-    #     data = json.load(data_file)
-    # #     TODO change size here for comparing with font-size in the Report
-    # sns.set(font_scale=1.5)
-    # sns.set_style("whitegrid")
-    # _to_plot = {'x': [],
-    #             'y': []}
-    # for denc in data:
-    #     _to_plot['x'].extend([denc[0]] * len(denc[1]))
-    #     _to_plot['y'].extend(denc[1])
-    #
-    # f, ax = plt.subplots(figsize=(12, 8))
-    # plt.scatter(_to_plot['x'], _to_plot['y'], alpha=0.4, color='red')
-    # _text = 'Density'
-    # ax.set(xlabel=_text, ylabel='Burned trees')
-    # plt.xticks([x for x in np.linspace(0, 1, 11)])
-    # plt.legend()
+    with open('ResultsDensity.raw') as data_file:
+        data = json.load(data_file)
+    #     TODO change size here for comparing with font-size in the Report
+    sns.set(font_scale=1.5)
+    sns.set_style("whitegrid")
+    _to_plot = {'x': [],
+                'y': []}
+    for denc in data:
+        _to_plot['x'].extend([denc[0]] * len(denc[1]))
+        _to_plot['y'].extend(denc[1])
+
+    f, ax = plt.subplots(figsize=(12, 8))
+    plt.scatter(_to_plot['x'], _to_plot['y'], alpha=0.4, color='red')
+    _text = 'Density'
+    ax.set(xlabel=_text, ylabel='Burned trees')
+    plt.xticks([x for x in np.linspace(0, 1, 11)])
+    plt.legend()
     # plt.show()
-    # plt.savefig('TreeDensity.png', bbox_inches='tight', dpi=1200)
+    plt.savefig('TreeDensity.png', bbox_inches='tight', dpi=1200)
