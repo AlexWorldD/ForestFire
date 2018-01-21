@@ -11,7 +11,7 @@ forest_params = {
     'height': 100,
     'TreeDensity': 1.0,
     'TreeDistribution': {TreeType.Deciduous: 0.3, TreeType.Conifer: 0.5, TreeType.Hardwood: 0.2},
-    'MAX_STEPS': 400,
+    'MAX_STEPS': 300,
     'InitFire': (0, 0),
     'FireSize': (2, 2),
     # 0 - no wind, + left2right, - right2left
@@ -52,7 +52,7 @@ class ForestModel(Model):
         self.TREES = dict()
         self.FIRE = dict()
         self.BORDER = dict()
-        self.DEAD = []
+        self.DEAD = dict()
         self.initial_grid()
         self.init_fire()
         self.add_defence()
@@ -68,8 +68,8 @@ class ForestModel(Model):
             trees_location = [(it // self._param_width, it % self._param_height) for it in
                               np.random.choice(len(range(self._param_width * self._param_height)),
                                                size=(
-                                                   round(
-                                                       self._param_treeDensity * self._param_width * self._param_height)),
+                                                   int(round(
+                                                       self._param_treeDensity * self._param_width * self._param_height))),
                                                replace=False)]
         _st = 0
         _end = 0
@@ -122,7 +122,7 @@ class ForestModel(Model):
         self.TREES = dict()
         self.FIRE = dict()
         self.BORDER = dict()
-        self.DEAD = []
+        self.DEAD = dict()
         self.initial_grid()
         self.init_fire()
         self.add_defence()
@@ -220,12 +220,16 @@ class ForestModel(Model):
         self.measurements['Burned'].append(len(patch_out))
         for i in patch_out:
             self.TREES.pop(i, None)
+            self.FIRE.pop(i, None)
+            self.DEAD[i] = 0
             # del self.FIRE[i]
         for i in patch_in:
             self.FIRE[i] = self.BORDER[i]
 
         self.measurements['Fire'].append(len(self.FIRE))
-        self.DEAD.extend(patch_out)
+        # self.DEAD.extend(patch_out)
+        # if self.T==150:
+        #     print('t')
         self.measurements['Dead'].append(len(self.DEAD))
         self.measurements['Trees'].append(len(self.TREES))
         # TODO we can call update_grid with settled interval, add to model_param
@@ -236,8 +240,8 @@ class ForestModel(Model):
         # 0 already means soil
         for key, item in self.TREES.items():
             self.grid[key[0]][key[1]] = item.get_color()
-        for it in self.DEAD:
-            self.grid[it[0]][it[1]] = 4
+        for key, item in self.DEAD.items():
+            self.grid[key[0]][key[1]] = 4
 
     def draw(self):
         """Draws the current state of the grid."""
